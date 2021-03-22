@@ -1,6 +1,7 @@
 package ksp.vilius.reddit.service;
 
 import ksp.vilius.reddit.dto.RegisterRequest;
+import ksp.vilius.reddit.exceptions.SpringRedditException;
 import ksp.vilius.reddit.model.NotificationEmail;
 import ksp.vilius.reddit.model.User;
 import ksp.vilius.reddit.model.VerificationToken;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -50,5 +52,20 @@ public class AuthService {
         verificationToken.setUser(user);
         verificationTokenRepository.save(verificationToken);
         return token;
+    }
+
+    public void verifyAccount(String token) {
+        Optional<VerificationToken> verificationToken = verificationTokenRepository.findByToken(token);
+        verificationToken.orElseThrow(() -> new SpringRedditException("Invalid token!"));
+        fetchUserAndEnableAccount(verificationToken.get());
+    }
+
+    @Transactional
+    private void fetchUserAndEnableAccount(VerificationToken verificationToken) {
+        String username = verificationToken.getUser().getUsername();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new SpringRedditException("User not found with username: " + username));
+        user.setEnabled(true);
+
     }
 }
