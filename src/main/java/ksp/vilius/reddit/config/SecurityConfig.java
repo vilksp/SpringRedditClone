@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -29,6 +30,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
+
+    public static String[] allowedMapping = {};
 
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter() {
@@ -62,6 +65,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/auth/**")
+                .permitAll()
+                .and()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.GET, "/api/subreddit")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
