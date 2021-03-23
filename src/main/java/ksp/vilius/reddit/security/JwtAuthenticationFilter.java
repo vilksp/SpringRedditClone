@@ -29,7 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String jwt = getJwtFromRequest(request);
 
         if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-            //Extract user id from jwt token
             String username = tokenProvider.getUsernameFromJwt(jwt);
 
             SecurityUser user = (SecurityUser) userDetailsService.loadUserByUsername(username);
@@ -40,11 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //If everything goes fine, set authentication to Security context holder
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-        } else {
-
-
-            filterChain.doFilter(request, response);
         }
+            filterChain.doFilter(request, response);
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {
