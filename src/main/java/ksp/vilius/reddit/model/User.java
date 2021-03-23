@@ -32,4 +32,11 @@ public class User {
     private String email;
     private Instant created;
     private boolean enabled;
+
+    public User(User user) {
+        this.username = user.getUsername();
+        this.password = user.getPassword();
+        this.email = user.getEmail();
+        this.enabled = user.isEnabled();
+    }
 }
