@@ -32,11 +32,14 @@ public class User {
     private String email;
     private Instant created;
     private boolean enabled;
+    private String role;
 
     public User(User user) {
+        this.userId = user.getUserId();
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.email = user.getEmail();
         this.enabled = user.isEnabled();
+        this.role = user.getRole();
     }
 }
