@@ -20,12 +20,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String s) throws UsernameNotFoundException {
-        Optional<User> userOptional = userRepository.findByUsername(s);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userOptional = userRepository.findByUsername(username);
         User user = userOptional.orElseThrow(() -> new UsernameNotFoundException("Theres no such user"));
 
         return new SecurityUser(user);
     }
-
 
 }

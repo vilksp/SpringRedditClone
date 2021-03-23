@@ -1,5 +1,7 @@
 package ksp.vilius.reddit.service;
 
+import ksp.vilius.reddit.dto.AuthenticationResponse;
+import ksp.vilius.reddit.dto.LoginRequest;
 import ksp.vilius.reddit.dto.RegisterRequest;
 import ksp.vilius.reddit.exceptions.SpringRedditException;
 import ksp.vilius.reddit.model.NotificationEmail;
@@ -7,7 +9,12 @@ import ksp.vilius.reddit.model.User;
 import ksp.vilius.reddit.model.VerificationToken;
 import ksp.vilius.reddit.repositories.UserRepository;
 import ksp.vilius.reddit.repositories.VerificationTokenRepository;
+import ksp.vilius.reddit.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +32,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtProvider jwtProvider;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -33,6 +42,7 @@ public class AuthService {
         user.setEmail(registerRequest.getEmail());
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setCreated(Instant.now());
+        user.setRole("ROLE_USER");
         user.setEnabled(false);
 
         userRepository.save(user);
@@ -66,6 +76,18 @@ public class AuthService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new SpringRedditException("User not found with username: " + username));
         user.setEnabled(true);
+        userRepository.save(user);
 
+    }
+
+    public AuthenticationResponse authenticateUser(LoginRequest loginRequest) {
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsername(), loginRequest.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authenticate);
+
+        String token = jwtProvider.generateToken(authenticate);
+
+        return new AuthenticationResponse(token, loginRequest.getUsername());
     }
 }

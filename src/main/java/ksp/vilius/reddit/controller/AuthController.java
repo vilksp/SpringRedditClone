@@ -1,5 +1,6 @@
 package ksp.vilius.reddit.controller;
 
+import ksp.vilius.reddit.dto.LoginRequest;
 import ksp.vilius.reddit.dto.RegisterRequest;
 import ksp.vilius.reddit.service.AuthService;
 import lombok.AllArgsConstructor;
@@ -28,6 +29,12 @@ public class AuthController {
 
         authService.verifyAccount(token);
         return new ResponseEntity<>("Account activated successfully", OK);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody LoginRequest loginRequest) {
+
+        return new ResponseEntity(authService.authenticateUser(loginRequest), OK);
     }
 
 }
