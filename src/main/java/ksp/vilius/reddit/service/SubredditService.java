@@ -1,6 +1,7 @@
 package ksp.vilius.reddit.service;
 
 import ksp.vilius.reddit.dto.SubredditDto;
+import ksp.vilius.reddit.exceptions.SpringRedditException;
 import ksp.vilius.reddit.model.Subreddit;
 import ksp.vilius.reddit.repositories.SubredditRepository;
 import lombok.AllArgsConstructor;
@@ -49,5 +50,15 @@ public class SubredditService {
                 .subredditName(subreddit.getName())
                 .description(subreddit.getDescription())
                 .build();
+    }
+
+    public SubredditDto getSubredditById(Long id) {
+        Subreddit subreddit = subredditRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new SpringRedditException("No subreddit found with such id: " + id));
+
+        return mapToDto(subreddit);
+
     }
 }
