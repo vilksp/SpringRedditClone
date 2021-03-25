@@ -2,6 +2,7 @@ package ksp.vilius.reddit.config;
 
 import ksp.vilius.reddit.security.JwtAuthenticationFilter;
 import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,12 +32,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
 
-    public static String[] allowedMapping = {};
 
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter() {
 
         return new JwtAuthenticationFilter();
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 
     @Bean
