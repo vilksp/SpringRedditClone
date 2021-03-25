@@ -5,6 +5,7 @@ import ksp.vilius.reddit.dto.LoginRequest;
 import ksp.vilius.reddit.dto.RegisterRequest;
 import ksp.vilius.reddit.exceptions.SpringRedditException;
 import ksp.vilius.reddit.model.NotificationEmail;
+import ksp.vilius.reddit.model.SecurityUser;
 import ksp.vilius.reddit.model.User;
 import ksp.vilius.reddit.model.VerificationToken;
 import ksp.vilius.reddit.repositories.UserRepository;
@@ -89,5 +90,14 @@ public class AuthService {
         String token = jwtProvider.generateToken(authenticate);
 
         return new AuthenticationResponse(token, loginRequest.getUsername());
+    }
+
+    public User getCurrentUser() {
+
+        SecurityUser principal = (SecurityUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return userRepository
+                .findByUsername(principal.getUsername())
+                .orElseThrow(() -> new SpringRedditException("No such user found with username"));
     }
 }
