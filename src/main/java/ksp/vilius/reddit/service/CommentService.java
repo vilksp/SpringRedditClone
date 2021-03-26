@@ -42,6 +42,7 @@ public class CommentService {
         comment.setUser(user);
         comment.setPost(post);
         comment.setCreatedDate(Instant.now());
+        log.info("new comment was created");
         commentRepository.save(comment);
 
         String message = mailContentBuilder.build(post.getUser().getUsername() + " posted comment on your post");
