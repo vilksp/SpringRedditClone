@@ -1,6 +1,7 @@
 package ksp.vilius.reddit.exceptions;
 
-public class PostNotFoundException extends X {
-    public PostNotFoundException(String s) {
+public class PostNotFoundException extends RuntimeException {
+    public PostNotFoundException(String message) {
+        super(message);
     }
 }
