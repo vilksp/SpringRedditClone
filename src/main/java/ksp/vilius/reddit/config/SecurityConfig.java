@@ -3,7 +3,6 @@ package ksp.vilius.reddit.config;
 import ksp.vilius.reddit.security.JwtAuthenticationFilter;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
