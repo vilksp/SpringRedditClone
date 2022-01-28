@@ -3,40 +3,47 @@ package ksp.vilius.reddit.security;
 import io.jsonwebtoken.*;
 import ksp.vilius.reddit.model.SecurityUser;
 import ksp.vilius.reddit.model.User;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Component
 public class JwtProvider {
 
 
     String secret = "3207C63AFF1E40703056B951343BD22C16851D3ED2D5DA257AB094E71BBD1712";
+    long expire = 60 * 60 * 24 * 7 * 1000;
+
 
     public String generateToken(Authentication authentication) {
 
         User user = (SecurityUser) authentication.getPrincipal();
 
-        long expire = 60 * 60 * 24 * 7 * 1000;
-
-
         Date now = new Date(System.currentTimeMillis());
         Date expiry = new Date(now.getTime() + expire);
 
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("username", user.getUsername());
-        claims.put("id", user.getUserId());
+//        Map<String, Object> claims = new HashMap<>();
+//        claims.put("username", user.getUsername());
+//        claims.put("id", user.getUserId());
         return Jwts.builder()
-                .setSubject(user.getUserId().toString())
-                .setClaims(claims)
+                .setSubject(user.getUsername())
+//                .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .setIssuer("Spring reddit clone")
                 .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
+    }
+
+    public String generateTokenWithUsername(String username) {
+
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(Date.from(Instant.now()))
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .setExpiration(Date.from(Instant.now().plusMillis(expire)))
                 .compact();
     }
 
@@ -73,5 +80,9 @@ public class JwtProvider {
             return claim.get("username").toString();
         }
         return username;
+    }
+
+    public long getExpire() {
+        return expire;
     }
 }
