@@ -4,14 +4,12 @@ import ksp.vilius.reddit.dto.AuthenticationResponse;
 import ksp.vilius.reddit.dto.LoginRequest;
 import ksp.vilius.reddit.dto.RegisterRequest;
 import ksp.vilius.reddit.exceptions.SpringRedditException;
-import ksp.vilius.reddit.model.NotificationEmail;
-import ksp.vilius.reddit.model.SecurityUser;
-import ksp.vilius.reddit.model.User;
-import ksp.vilius.reddit.model.VerificationToken;
+import ksp.vilius.reddit.model.*;
 import ksp.vilius.reddit.repositories.UserRepository;
 import ksp.vilius.reddit.repositories.VerificationTokenRepository;
 import ksp.vilius.reddit.security.JwtProvider;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -35,6 +33,7 @@ public class AuthService {
     private final MailService mailService;
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
+    private final RefreshTokenService tokenService;
 
     @Transactional
     public void signup(RegisterRequest registerRequest) {
@@ -89,7 +88,12 @@ public class AuthService {
 
         String token = jwtProvider.generateToken(authenticate);
 
-        return new AuthenticationResponse(token, loginRequest.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(tokenService.generateRefreshToken().getToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getExpire()))
+                .username(loginRequest.getUsername())
+                .build();
     }
 
     public User getCurrentUser() {
@@ -99,5 +103,16 @@ public class AuthService {
         return userRepository
                 .findByUsername(principal.getUsername())
                 .orElseThrow(() -> new SpringRedditException("No such user found with username"));
+    }
+
+    public AuthenticationResponse refreshToken(RefreshTokenRequest request) {
+        tokenService.validateRefreshToken(request.getRefreshToken());
+        String token = jwtProvider.generateTokenWithUsername(request.getUsername());
+        return AuthenticationResponse.builder()
+                .authenticationToken(token)
+                .refreshToken(request.getRefreshToken())
+                .expiresAt(Instant.now().plusMillis(jwtProvider.getExpire()))
+                .username(request.getUsername())
+                .build();
     }
 }
